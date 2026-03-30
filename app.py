@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request
 import pandas as pd
-import re
 
 app = Flask(__name__)
-application = app  # IMPORTANT for Azure
+application = app  # REQUIRED for Azure
 
 @app.route('/')
 def index():
@@ -16,7 +15,6 @@ def analyze():
         inventory_file = request.files['inventory']
         incident_file = request.files['incident']
 
-        # Read files
         inv = pd.read_excel(inventory_file)
         inc = pd.read_excel(incident_file)
 
@@ -24,39 +22,47 @@ def analyze():
         inventory_count = len(inv)
         incident_count = len(inc)
 
-        # Safe column handling
-        def safe_col(df, col):
-            return col in df.columns
+        # Inventory insights
+        top_os_sub = (
+            inv['operating_system_subcategory'].value_counts().idxmax()
+            if 'operating_system_subcategory' in inv else "N/A"
+        )
 
-        # Inventory metrics
-        top_os_sub = inv['operating_system_subcategory'].value_counts().idxmax() \
-            if safe_col(inv, 'operating_system_subcategory') else "N/A"
+        top_os_name = (
+            inv['operating_system_name'].value_counts().idxmax()
+            if 'operating_system_name' in inv else "N/A"
+        )
 
-        top_os_name = inv['operating_system_name'].value_counts().idxmax() \
-            if safe_col(inv, 'operating_system_name') else "N/A"
+        # Incident charts
+        priority_counts = (
+            inc['priority'].value_counts().to_dict()
+            if 'priority' in inc else {}
+        )
 
-        # Incident metrics
-        priority_counts = inc['priority'].value_counts().to_dict() \
-            if safe_col(inc, 'priority') else {}
+        top_hosts = (
+            inc['hostname'].value_counts().head(10).to_dict()
+            if 'hostname' in inc else {}
+        )
 
-        top_hosts = inc['hostname'].value_counts().head(10).to_dict() \
-            if safe_col(inc, 'hostname') else {}
+        resolution_percent = (
+            (inc['resolution_code'].value_counts(normalize=True) * 100)
+            .round(2).to_dict()
+            if 'resolution_code' in inc else {}
+        )
 
-        resolution_percent = (inc['resolution_code'].value_counts(normalize=True) * 100).round(2).to_dict() \
-            if safe_col(inc, 'resolution_code') else {}
+        os_percent = (
+            (inc['os_type'].value_counts(normalize=True) * 100)
+            .round(2).to_dict()
+            if 'os_type' in inc else {}
+        )
 
-        os_percent = (inc['os_type'].value_counts(normalize=True) * 100).round(2).to_dict() \
-            if safe_col(inc, 'os_type') else {}
-
-        # -------- TEXT CATEGORY EXTRACTION --------
-        def extract_keywords(text_series):
-            words = []
-            for text in text_series.dropna():
-                words += re.findall(r'\b[a-zA-Z]{4,}\b', str(text).lower())
-            return pd.Series(words).value_counts().head(10).to_dict()
-
-        top_categories = extract_keywords(inc['summary']) \
-            if safe_col(inc, 'summary') else {}
+        # Top categories from summary
+        if 'summary' in inc:
+            text = " ".join(inc['summary'].dropna().astype(str))
+            words = pd.Series(text.lower().split())
+            top_categories = words.value_counts().head(10).to_dict()
+        else:
+            top_categories = {}
 
         return render_template(
             'result.html',
@@ -75,5 +81,5 @@ def analyze():
         return f"Error: {str(e)}"
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)

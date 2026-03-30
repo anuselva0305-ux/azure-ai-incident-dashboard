@@ -5,35 +5,51 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family: Arial; background: #f5f7fa; padding: 20px; }
-        .top { display: flex; justify-content: space-between; }
-        .card { background: white; padding: 15px; margin: 10px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
-        canvas { margin: 20px 0; }
-        a { text-decoration: none; color: #0078D4; }
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+        canvas {
+            max-width: 500px;
+            margin: auto;
+        }
+        .back {
+            margin: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            background: #0078D4;
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="top">
-    <h2>📊 Dashboard Result</h2>
-    <a href="/">⬅ Back</a>
-</div>
+<a href="/" class="back">⬅ Back</a>
 
 <div class="card">
-    <h3>Inventory Count: {{ inventory_count }}</h3>
-    <h3>Incident Count: {{ incident_count }}</h3>
-    <h3>Top OS Subcategory: {{ top_os_sub }}</h3>
-    <h3>Top OS Name: {{ top_os_name }}</h3>
+    <h2>Summary</h2>
+    <p>Inventory Count: {{ inventory_count }}</p>
+    <p>Incident Count: {{ incident_count }}</p>
+    <p>Top OS Subcategory: {{ top_os_sub }}</p>
+    <p>Top OS Name: {{ top_os_name }}</p>
 </div>
 
-<!-- CHARTS -->
 <div class="card">
     <h3>Priority Distribution</h3>
     <canvas id="priorityChart"></canvas>
 </div>
 
 <div class="card">
-    <h3>Top Hosts</h3>
+    <h3>Top 10 Hosts</h3>
     <canvas id="hostChart"></canvas>
 </div>
 
@@ -53,56 +69,32 @@
 </div>
 
 <script>
-const priorityData = {{ priority_counts | tojson }};
-const hostData = {{ top_hosts | tojson }};
-const resolutionData = {{ resolution_percent | tojson }};
-const osData = {{ os_percent | tojson }};
-const categoryData = {{ top_categories | tojson }};
+const priorityData = {{ priority_counts | default({}) | tojson }};
+const hostData = {{ top_hosts | default({}) | tojson }};
+const resolutionData = {{ resolution_percent | default({}) | tojson }};
+const osData = {{ os_percent | default({}) | tojson }};
+const categoryData = {{ top_categories | default({}) | tojson }};
 
-// Priority Chart
-new Chart(document.getElementById('priorityChart'), {
-    type: 'bar',
-    data: {
-        labels: Object.keys(priorityData),
-        datasets: [{ label: 'Priority', data: Object.values(priorityData) }]
-    }
-});
+function createChart(id, type, dataObj) {
+    if (Object.keys(dataObj).length === 0) return;
 
-// Hosts
-new Chart(document.getElementById('hostChart'), {
-    type: 'bar',
-    data: {
-        labels: Object.keys(hostData),
-        datasets: [{ label: 'Hosts', data: Object.values(hostData) }]
-    }
-});
+    new Chart(document.getElementById(id), {
+        type: type,
+        data: {
+            labels: Object.keys(dataObj),
+            datasets: [{
+                data: Object.values(dataObj)
+            }]
+        }
+    });
+}
 
-// Resolution
-new Chart(document.getElementById('resolutionChart'), {
-    type: 'pie',
-    data: {
-        labels: Object.keys(resolutionData),
-        datasets: [{ data: Object.values(resolutionData) }]
-    }
-});
+createChart("priorityChart", "bar", priorityData);
+createChart("hostChart", "bar", hostData);
+createChart("resolutionChart", "pie", resolutionData);
+createChart("osChart", "pie", osData);
+createChart("categoryChart", "bar", categoryData);
 
-// OS Type
-new Chart(document.getElementById('osChart'), {
-    type: 'pie',
-    data: {
-        labels: Object.keys(osData),
-        datasets: [{ data: Object.values(osData) }]
-    }
-});
-
-// Categories
-new Chart(document.getElementById('categoryChart'), {
-    type: 'bar',
-    data: {
-        labels: Object.keys(categoryData),
-        datasets: [{ label: 'Categories', data: Object.values(categoryData) }]
-    }
-});
 </script>
 
 </body>
