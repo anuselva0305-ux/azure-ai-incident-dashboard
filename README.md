@@ -1,73 +1,44 @@
 # 🚀 Azure AI Incident Dashboard
 
-An end-to-end Azure AI project that analyzes incident data and provides intelligent insights through a web-based dashboard.
+An executive-level dashboard built using **Flask + Pandas + Chart.js**, deployed on **Microsoft Azure App Service**.
 
 ---
 
-## 🌟 Project Overview
+## 📊 Features
 
-This project demonstrates how to build, deploy, and host a cloud-based AI application using Microsoft Azure. It processes incident data, identifies trends, and generates insights to support data-driven decision-making.
-
----
-
-## 🔧 Features
-
-- 📊 Incident data analysis using Python (Pandas)
-- 🤖 AI-based insights generation
-- 🌐 Web dashboard built with Flask
-- ☁️ Deployment on Azure Web Apps
-- 🔁 CI/CD integration using GitHub
-
----
-
-## 🏗️ Architecture
-
-Data (CSV) → Python Processing → Flask App → Azure Web App → Dashboard UI
+- Upload Inventory & Incident Excel files
+- Auto-detect columns dynamically
+- Executive dashboard with:
+  - Total Inventory Count
+  - Total Incident Count
+  - Top OS Subcategory
+  - Top OS Name
+- Visual insights:
+  - Priority distribution (Bar Chart)
+  - Top 10 Hosts (Bar Chart)
+  - Resolution Code % (Pie Chart)
+  - OS Type % (Doughnut Chart)
 
 ---
 
-## 🧰 Tech Stack
+## 🧠 Tech Stack
 
-- Python (Flask, Pandas, Scikit-learn)
-- Microsoft Azure Web App
+- Python (Flask)
+- Pandas
+- Chart.js
+- HTML/CSS
+- Azure App Service (Deployment)
 - GitHub (CI/CD)
-- HTML (UI)
 
 ---
 
-## 🚀 Deployment
-
-The application is deployed on Azure Web Apps and integrated with GitHub for continuous deployment.
-
----
-
-## 📊 Use Case
-
-This solution helps organizations:
-
-- Monitor incident trends
-- Identify top problem categories
-- Generate actionable insights
-- Improve operational efficiency
-
----
-
-## 🔮 Future Enhancements
-
-- 📈 Machine Learning model for incident prediction
-- 📊 Interactive charts (Chart.js / Power BI)
-- 🤖 Azure OpenAI integration for intelligent insights
-- 📡 Real-time data integration
-
----
-
-## 👩‍💻 Author
-
-**Anitha Kesavan**  
-Azure AI & Data Enthusiast  
-
----
-
-## 🔗 GitHub Repository
-
-https://github.com/anuselva0305-ux/azure-ai-incident-dashboard
+## 📂 Project Structure
+azure-ai-incident-dashboard/
+│
+├── app.py
+├── requirements.txt
+├── templates/
+│ ├── index.html
+│ └── result.html
+├── static/
+└── README.md
