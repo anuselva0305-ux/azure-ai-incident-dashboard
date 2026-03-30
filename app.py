@@ -2,7 +2,8 @@ from flask import Flask, render_template, request
 import pandas as pd
 
 app = Flask(__name__)
-application = app  # REQUIRED for Azure
+application = app  # Azure requirement
+
 
 @app.route('/')
 def index():
@@ -18,51 +19,81 @@ def analyze():
         inv = pd.read_excel(inventory_file)
         inc = pd.read_excel(incident_file)
 
-        # ---------------- METRICS ----------------
+        # =========================
+        # NORMALIZE COLUMN NAMES
+        # =========================
+        inv.columns = inv.columns.str.strip().str.lower()
+        inc.columns = inc.columns.str.strip().str.lower()
+
+        print("INVENTORY COLUMNS:", inv.columns)
+        print("INCIDENT COLUMNS:", inc.columns)
+
+        # =========================
+        # COUNTS
+        # =========================
         inventory_count = len(inv)
         incident_count = len(inc)
 
-        # Inventory insights
-        top_os_sub = (
-            inv['operating_system_subcategory'].value_counts().idxmax()
-            if 'operating_system_subcategory' in inv else "N/A"
-        )
+        # =========================
+        # INVENTORY DATA
+        # =========================
+        top_os_sub = "N/A"
+        top_os_name = "N/A"
 
-        top_os_name = (
-            inv['operating_system_name'].value_counts().idxmax()
-            if 'operating_system_name' in inv else "N/A"
-        )
+        for col in inv.columns:
+            if 'subcategory' in col:
+                top_os_sub = inv[col].value_counts().idxmax()
+            if 'operating_system' in col or 'os name' in col:
+                top_os_name = inv[col].value_counts().idxmax()
 
-        # Incident charts
+        # =========================
+        # INCIDENT DATA (AUTO DETECT)
+        # =========================
+
+        priority_col = None
+        host_col = None
+        resolution_col = None
+        os_col = None
+
+        for col in inc.columns:
+            if 'priority' in col:
+                priority_col = col
+            elif 'host' in col:
+                host_col = col
+            elif 'resolution' in col:
+                resolution_col = col
+            elif 'os type' in col or col == 'os':
+                os_col = col
+
+        # =========================
+        # CALCULATIONS
+        # =========================
+
         priority_counts = (
-            inc['priority'].value_counts().to_dict()
-            if 'priority' in inc else {}
+            inc[priority_col].value_counts().to_dict()
+            if priority_col else {}
         )
 
         top_hosts = (
-            inc['hostname'].value_counts().head(10).to_dict()
-            if 'hostname' in inc else {}
+            inc[host_col].value_counts().head(10).to_dict()
+            if host_col else {}
         )
 
         resolution_percent = (
-            (inc['resolution_code'].value_counts(normalize=True) * 100)
-            .round(2).to_dict()
-            if 'resolution_code' in inc else {}
+            (inc[resolution_col].value_counts(normalize=True) * 100)
+            .round(2)
+            .head(10)
+            .to_dict()
+            if resolution_col else {}
         )
 
         os_percent = (
-            (inc['os_type'].value_counts(normalize=True) * 100)
-            .round(2).to_dict()
-            if 'os_type' in inc else {}
+            (inc[os_col].value_counts(normalize=True) * 100)
+            .round(2)
+            .head(10)
+            .to_dict()
+            if os_col else {}
         )
-
-        # Top categories from summary
-        if 'summary' in inc:
-            text = " ".join(inc['summary'].dropna().astype(str))
-            words = pd.Series(text.lower().split())
-            top_categories = words.value_counts().head(10).to_dict()
-        else:
-            top_categories = {}
 
         return render_template(
             'result.html',
@@ -73,13 +104,12 @@ def analyze():
             priority_counts=priority_counts,
             top_hosts=top_hosts,
             resolution_percent=resolution_percent,
-            os_percent=os_percent,
-            top_categories=top_categories
+            os_percent=os_percent
         )
 
     except Exception as e:
         return f"Error: {str(e)}"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

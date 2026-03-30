@@ -1,100 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard Result</title>
+    <title>Executive Dashboard</title>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body {
-            font-family: Arial;
-            background: #f5f7fa;
-            padding: 20px;
+        body { font-family:'Segoe UI'; background:#f4f6f9; margin:0; }
+
+        .header {
+            background:#1f2937;
+            color:white;
+            padding:15px 30px;
+            display:flex;
+            justify-content:space-between;
         }
+
+        .container { padding:20px; }
+
+        .cards {
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:20px;
+        }
+
         .card {
-            background: white;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 10px;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            text-align:center;
         }
-        canvas {
-            max-width: 500px;
-            margin: auto;
+
+        .charts {
+            margin-top:20px;
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:20px;
         }
-        .back {
-            margin: 20px;
-            display: inline-block;
-            padding: 10px 20px;
-            background: #0078D4;
-            color: white;
-            text-decoration: none;
+
+        .chart-card {
+            background:white;
+            padding:20px;
+            border-radius:10px;
         }
     </style>
 </head>
 
 <body>
 
-<a href="/" class="back">⬅ Back</a>
-
-<div class="card">
-    <h2>Summary</h2>
-    <p>Inventory Count: {{ inventory_count }}</p>
-    <p>Incident Count: {{ incident_count }}</p>
-    <p>Top OS Subcategory: {{ top_os_sub }}</p>
-    <p>Top OS Name: {{ top_os_name }}</p>
+<div class="header">
+    <h2>📊 Executive Dashboard</h2>
+    <a href="/" style="color:white;">⬅ Back</a>
 </div>
 
-<div class="card">
-    <h3>Priority Distribution</h3>
-    <canvas id="priorityChart"></canvas>
+<div class="container">
+
+<div class="cards">
+    <div class="card">Inventory<br><b>{{ inventory_count }}</b></div>
+    <div class="card">Incidents<br><b>{{ incident_count }}</b></div>
+    <div class="card">Top OS Sub<br><b>{{ top_os_sub }}</b></div>
+    <div class="card">Top OS Name<br><b>{{ top_os_name }}</b></div>
 </div>
 
-<div class="card">
-    <h3>Top 10 Hosts</h3>
-    <canvas id="hostChart"></canvas>
+<div class="charts">
+
+<div class="chart-card">
+<h3>Priority</h3>
+<canvas id="priorityChart"></canvas>
 </div>
 
-<div class="card">
-    <h3>Resolution %</h3>
-    <canvas id="resolutionChart"></canvas>
+<div class="chart-card">
+<h3>Top Hosts</h3>
+<canvas id="hostChart"></canvas>
 </div>
 
-<div class="card">
-    <h3>OS Type %</h3>
-    <canvas id="osChart"></canvas>
+<div class="chart-card">
+<h3>Resolution %</h3>
+<canvas id="resolutionChart"></canvas>
 </div>
 
-<div class="card">
-    <h3>Top Categories</h3>
-    <canvas id="categoryChart"></canvas>
+<div class="chart-card">
+<h3>OS Type %</h3>
+<canvas id="osChart"></canvas>
+</div>
+
+</div>
+
 </div>
 
 <script>
-const priorityData = {{ priority_counts | default({}) | tojson }};
-const hostData = {{ top_hosts | default({}) | tojson }};
-const resolutionData = {{ resolution_percent | default({}) | tojson }};
-const osData = {{ os_percent | default({}) | tojson }};
-const categoryData = {{ top_categories | default({}) | tojson }};
+const priorityData = {{ priority_counts | tojson }};
+const hostData = {{ top_hosts | tojson }};
+const resolutionData = {{ resolution_percent | tojson }};
+const osData = {{ os_percent | tojson }};
 
-function createChart(id, type, dataObj) {
-    if (Object.keys(dataObj).length === 0) return;
+function draw(id,type,data){
+    if(!data || Object.keys(data).length===0){
+        console.log(id + " empty");
+        return;
+    }
 
-    new Chart(document.getElementById(id), {
-        type: type,
-        data: {
-            labels: Object.keys(dataObj),
-            datasets: [{
-                data: Object.values(dataObj)
+    new Chart(document.getElementById(id),{
+        type:type,
+        data:{
+            labels:Object.keys(data),
+            datasets:[{
+                data:Object.values(data),
+                backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1']
             }]
         }
     });
 }
 
-createChart("priorityChart", "bar", priorityData);
-createChart("hostChart", "bar", hostData);
-createChart("resolutionChart", "pie", resolutionData);
-createChart("osChart", "pie", osData);
-createChart("categoryChart", "bar", categoryData);
-
+draw("priorityChart","bar",priorityData);
+draw("hostChart","bar",hostData);
+draw("resolutionChart","pie",resolutionData);
+draw("osChart","doughnut",osData);
 </script>
 
 </body>
