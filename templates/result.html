@@ -1,105 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
+    <title>Dashboard Result</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-        }
-        .header {
-            background: #0078D4;
-            color: white;
-            padding: 15px;
-            text-align: center;
-        }
-        .tabs {
-            text-align: center;
-            margin: 20px;
-        }
-        .tabs button {
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-        }
-        .card {
-            display: inline-block;
-            background: white;
-            padding: 20px;
-            margin: 10px;
-            width: 200px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        }
-        #charts {
-            display: none;
-            width: 60%;
-            margin: auto;
-        }
+        body { font-family: Arial; background: #f5f7fa; padding: 20px; }
+        .top { display: flex; justify-content: space-between; }
+        .card { background: white; padding: 15px; margin: 10px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+        canvas { margin: 20px 0; }
+        a { text-decoration: none; color: #0078D4; }
     </style>
 </head>
-
 <body>
 
-<div class="header">
-    <h1>🚀 Azure AI Dashboard</h1>
+<div class="top">
+    <h2>📊 Dashboard Result</h2>
+    <a href="/">⬅ Back</a>
 </div>
 
-<div class="tabs">
-    <button onclick="showTab('summary')">Summary</button>
-    <button onclick="showTab('charts')">Charts</button>
+<div class="card">
+    <h3>Inventory Count: {{ inventory_count }}</h3>
+    <h3>Incident Count: {{ incident_count }}</h3>
+    <h3>Top OS Subcategory: {{ top_os_sub }}</h3>
+    <h3>Top OS Name: {{ top_os_name }}</h3>
 </div>
 
-<!-- SUMMARY -->
-<div id="summary" style="text-align:center;">
-    <div class="card">
-        <h3>Inventory</h3>
-        <h2>{{ inventory_count }}</h2>
-    </div>
-
-    <div class="card">
-        <h3>Incidents</h3>
-        <h2>{{ incident_count }}</h2>
-    </div>
-
-    <div class="card">
-        <h3>Top OS Sub</h3>
-        <h4>{{ top_os_sub }}</h4>
-    </div>
-
-    <div class="card">
-        <h3>Top OS Name</h3>
-        <h4>{{ top_os_name }}</h4>
-    </div>
-</div>
-
-<!-- CHART -->
-<div id="charts">
+<!-- CHARTS -->
+<div class="card">
+    <h3>Priority Distribution</h3>
     <canvas id="priorityChart"></canvas>
 </div>
 
+<div class="card">
+    <h3>Top Hosts</h3>
+    <canvas id="hostChart"></canvas>
+</div>
+
+<div class="card">
+    <h3>Resolution %</h3>
+    <canvas id="resolutionChart"></canvas>
+</div>
+
+<div class="card">
+    <h3>OS Type %</h3>
+    <canvas id="osChart"></canvas>
+</div>
+
+<div class="card">
+    <h3>Top Categories</h3>
+    <canvas id="categoryChart"></canvas>
+</div>
+
 <script>
-function showTab(tab) {
-    document.getElementById("summary").style.display = "none";
-    document.getElementById("charts").style.display = "none";
-    document.getElementById(tab).style.display = "block";
-}
+const priorityData = {{ priority_counts | tojson }};
+const hostData = {{ top_hosts | tojson }};
+const resolutionData = {{ resolution_percent | tojson }};
+const osData = {{ os_percent | tojson }};
+const categoryData = {{ top_categories | tojson }};
 
-// Chart
-const data = {{ priority_counts | tojson }};
-const labels = Object.keys(data);
-const values = Object.values(data);
-
-new Chart(document.getElementById("priorityChart"), {
-    type: "bar",
+// Priority Chart
+new Chart(document.getElementById('priorityChart'), {
+    type: 'bar',
     data: {
-        labels: labels,
-        datasets: [{
-            label: "Ticket Priority",
-            data: values
-        }]
+        labels: Object.keys(priorityData),
+        datasets: [{ label: 'Priority', data: Object.values(priorityData) }]
+    }
+});
+
+// Hosts
+new Chart(document.getElementById('hostChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(hostData),
+        datasets: [{ label: 'Hosts', data: Object.values(hostData) }]
+    }
+});
+
+// Resolution
+new Chart(document.getElementById('resolutionChart'), {
+    type: 'pie',
+    data: {
+        labels: Object.keys(resolutionData),
+        datasets: [{ data: Object.values(resolutionData) }]
+    }
+});
+
+// OS Type
+new Chart(document.getElementById('osChart'), {
+    type: 'pie',
+    data: {
+        labels: Object.keys(osData),
+        datasets: [{ data: Object.values(osData) }]
+    }
+});
+
+// Categories
+new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(categoryData),
+        datasets: [{ label: 'Categories', data: Object.values(categoryData) }]
     }
 });
 </script>

@@ -3,48 +3,27 @@
 <head>
     <title>Azure AI Dashboard</title>
     <style>
-        body {
-            font-family: Arial;
-            background: #f5f7fa;
-            text-align: center;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            margin: 100px auto;
-            width: 400px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        input, button {
-            margin: 10px;
-            padding: 10px;
-            width: 90%;
-        }
-        button {
-            background: #0078D4;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #005fa3;
-        }
+        body { font-family: Arial; text-align: center; background: #f5f7fa; }
+        .card { background: white; padding: 30px; margin: 80px auto; width: 400px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+        input, button { margin: 10px; padding: 10px; width: 90%; }
+        button { background: #0078D4; color: white; border: none; cursor: pointer; }
     </style>
 </head>
-
 <body>
-<div class="container">
-    <h1>📊 Azure AI Dashboard</h1>
+
+<div class="card">
+    <h2>📊 Azure AI Dashboard</h2>
 
     <form action="/analyze" method="post" enctype="multipart/form-data">
+        <label><b>Upload Inventory File</b></label><br>
         <input type="file" name="inventory" required><br>
+
+        <label><b>Upload Incident File</b></label><br>
         <input type="file" name="incident" required><br>
-        <button type="submit">Analyze 🚀</button>
+
+        <button type="submit">🚀 Analyze</button>
     </form>
 </div>
+
 </body>
 </html>

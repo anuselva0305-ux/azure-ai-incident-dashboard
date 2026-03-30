@@ -1,89 +1,65 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import pandas as pd
-import os
+import re
 
 app = Flask(__name__)
 application = app  # IMPORTANT for Azure
 
-# Home page (Upload page)
-@app.route("/", methods=["GET"])
-def home():
-    return render_template("index.html")
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
-# Analyze route
-@app.route("/analyze", methods=["POST"])
+@app.route('/analyze', methods=['POST'])
 def analyze():
     try:
-        # Get uploaded files
-        inventory_file = request.files.get('inventory')
-        incident_file = request.files.get('incident')
+        inventory_file = request.files['inventory']
+        incident_file = request.files['incident']
 
-        if not inventory_file or not incident_file:
-            return "Please upload both files"
-
-        # Read Excel files
+        # Read files
         inv = pd.read_excel(inventory_file)
         inc = pd.read_excel(incident_file)
 
-        # -------------------------
-        # METRICS CALCULATION
-        # -------------------------
-
+        # ---------------- METRICS ----------------
         inventory_count = len(inv)
         incident_count = len(inc)
 
         # Safe column handling
-        top_os_sub = (
-            inv['operating_system_subcategory'].value_counts().idxmax()
-            if 'operating_system_subcategory' in inv else "N/A"
-        )
+        def safe_col(df, col):
+            return col in df.columns
 
-        top_os_name = (
-            inv['operating_system_name'].value_counts().idxmax()
-            if 'operating_system_name' in inv else "N/A"
-        )
+        # Inventory metrics
+        top_os_sub = inv['operating_system_subcategory'].value_counts().idxmax() \
+            if safe_col(inv, 'operating_system_subcategory') else "N/A"
 
-        priority_counts = (
-            inc['priority'].value_counts().to_dict()
-            if 'priority' in inc else {}
-        )
+        top_os_name = inv['operating_system_name'].value_counts().idxmax() \
+            if safe_col(inv, 'operating_system_name') else "N/A"
 
-        top_hosts = (
-            inc['hostname'].value_counts().head(10).to_dict()
-            if 'hostname' in inc else {}
-        )
+        # Incident metrics
+        priority_counts = inc['priority'].value_counts().to_dict() \
+            if safe_col(inc, 'priority') else {}
 
-        resolution_percent = (
-            (inc['resolution_code'].value_counts(normalize=True) * 100).round(2).to_dict()
-            if 'resolution_code' in inc else {}
-        )
+        top_hosts = inc['hostname'].value_counts().head(10).to_dict() \
+            if safe_col(inc, 'hostname') else {}
 
-        os_percent = (
-            (inc['os_type'].value_counts(normalize=True) * 100).round(2).to_dict()
-            if 'os_type' in inc else {}
-        )
+        resolution_percent = (inc['resolution_code'].value_counts(normalize=True) * 100).round(2).to_dict() \
+            if safe_col(inc, 'resolution_code') else {}
 
-        # Extract top words from summary
-        if 'summary' in inc:
-            top_categories = (
-                inc['summary']
-                .astype(str)
-                .str.split()
-                .explode()
-                .value_counts()
-                .head(10)
-                .to_dict()
-            )
-        else:
-            top_categories = {}
+        os_percent = (inc['os_type'].value_counts(normalize=True) * 100).round(2).to_dict() \
+            if safe_col(inc, 'os_type') else {}
 
-        # -------------------------
-        # SEND TO UI
-        # -------------------------
+        # -------- TEXT CATEGORY EXTRACTION --------
+        def extract_keywords(text_series):
+            words = []
+            for text in text_series.dropna():
+                words += re.findall(r'\b[a-zA-Z]{4,}\b', str(text).lower())
+            return pd.Series(words).value_counts().head(10).to_dict()
+
+        top_categories = extract_keywords(inc['summary']) \
+            if safe_col(inc, 'summary') else {}
 
         return render_template(
-            "result.html",
+            'result.html',
             inventory_count=inventory_count,
             incident_count=incident_count,
             top_os_sub=top_os_sub,
@@ -96,9 +72,8 @@ def analyze():
         )
 
     except Exception as e:
-        return f"Error occurred: {str(e)}"
+        return f"Error: {str(e)}"
 
 
-# Run locally
 if __name__ == "__main__":
     app.run(debug=True)
