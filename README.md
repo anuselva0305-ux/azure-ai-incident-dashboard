@@ -42,3 +42,29 @@ azure-ai-incident-dashboard/
 │ └── result.html
 ├── static/
 └── README.md
+
+
+---
+
+## ⚙️ Setup (Local)
+
+```bash
+git clone https://github.com/anuselva0305-ux/azure-ai-incident-dashboard.git
+cd azure-ai-incident-dashboard
+
+pip install -r requirements.txt
+python app.py
+
+http://127.0.0.1:5000
+
+☁️ Azure Deployment
+Create an Azure App Service
+Go to Deployment Center
+Connect your GitHub repository
+Select branch: main
+Azure will auto-deploy your app
+
+🌐 Live Application
+👉 https://anitha-ai-dashboard-h0fjcudsc6g3akgw.centralindia-01.azurewebsites.net/
+
+
