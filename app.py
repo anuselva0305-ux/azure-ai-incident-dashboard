@@ -10,7 +10,6 @@ def home():
     total = len(data)
     top_category = data['category'].value_counts().idxmax()
 
-    # Simple AI Insight
     if total > 3:
         insight = "High incident volume detected"
     else:
@@ -21,5 +20,8 @@ def home():
                            top=top_category,
                            insight=insight)
 
+# IMPORTANT: This line MUST exist
+application = app
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
