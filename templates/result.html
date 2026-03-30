@@ -6,7 +6,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family:'Segoe UI'; background:#f4f6f9; margin:0; }
+        body {
+            font-family:'Segoe UI';
+            background:#f4f6f9;
+            margin:0;
+        }
 
         .header {
             background:#1f2937;
@@ -14,6 +18,7 @@
             padding:15px 30px;
             display:flex;
             justify-content:space-between;
+            align-items:center;
         }
 
         .container { padding:20px; }
@@ -42,6 +47,14 @@
             background:white;
             padding:20px;
             border-radius:10px;
+            height:320px;
+            display:flex;
+            flex-direction:column;
+        }
+
+        .chart-card canvas {
+            flex:1;
+            max-height:250px;
         }
     </style>
 </head>
@@ -94,28 +107,40 @@ const hostData = {{ top_hosts | tojson }};
 const resolutionData = {{ resolution_percent | tojson }};
 const osData = {{ os_percent | tojson }};
 
-function draw(id,type,data){
-    if(!data || Object.keys(data).length===0){
+const colors = [
+    '#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1',
+    '#14b8a6','#e11d48','#a855f7','#22c55e','#f97316'
+];
+
+function drawChart(id, type, data) {
+    if (!data || Object.keys(data).length === 0) {
         console.log(id + " empty");
         return;
     }
 
-    new Chart(document.getElementById(id),{
-        type:type,
-        data:{
-            labels:Object.keys(data),
-            datasets:[{
-                data:Object.values(data),
-                backgroundColor:['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1']
+    new Chart(document.getElementById(id), {
+        type: type,
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                data: Object.values(data),
+                backgroundColor: colors
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' }
+            }
         }
     });
 }
 
-draw("priorityChart","bar",priorityData);
-draw("hostChart","bar",hostData);
-draw("resolutionChart","pie",resolutionData);
-draw("osChart","doughnut",osData);
+drawChart("priorityChart","bar",priorityData);
+drawChart("hostChart","bar",hostData);
+drawChart("resolutionChart","pie",resolutionData);
+drawChart("osChart","doughnut",osData);
 </script>
 
 </body>

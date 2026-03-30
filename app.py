@@ -19,24 +19,18 @@ def analyze():
         inv = pd.read_excel(inventory_file)
         inc = pd.read_excel(incident_file)
 
-        # =========================
         # NORMALIZE COLUMN NAMES
-        # =========================
         inv.columns = inv.columns.str.strip().str.lower()
         inc.columns = inc.columns.str.strip().str.lower()
 
         print("INVENTORY COLUMNS:", inv.columns)
         print("INCIDENT COLUMNS:", inc.columns)
 
-        # =========================
         # COUNTS
-        # =========================
         inventory_count = len(inv)
         incident_count = len(inc)
 
-        # =========================
         # INVENTORY DATA
-        # =========================
         top_os_sub = "N/A"
         top_os_name = "N/A"
 
@@ -47,23 +41,22 @@ def analyze():
                 top_os_name = inv[col].value_counts().idxmax()
 
         # =========================
-        # INCIDENT DATA (AUTO DETECT)
+        # INCIDENT AUTO DETECT
         # =========================
+        def find_column(columns, keywords):
+            for key in keywords:
+                for col in columns:
+                    if key in col:
+                        return col
+            return None
 
-        priority_col = None
-        host_col = None
-        resolution_col = None
-        os_col = None
+        priority_col = find_column(inc.columns, ['priority'])
+        host_col = find_column(inc.columns, ['host'])
+        resolution_col = find_column(inc.columns, ['resolution'])
+        os_col = find_column(inc.columns, ['os'])
 
-        for col in inc.columns:
-            if 'priority' in col:
-                priority_col = col
-            elif 'host' in col:
-                host_col = col
-            elif 'resolution' in col:
-                resolution_col = col
-            elif 'os type' in col or col == 'os':
-                os_col = col
+        print("Detected Columns:")
+        print(priority_col, host_col, resolution_col, os_col)
 
         # =========================
         # CALCULATIONS
