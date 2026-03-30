@@ -67,4 +67,3 @@ Azure will auto-deploy your app
 🌐 Live Application
 👉 https://anitha-ai-dashboard-h0fjcudsc6g3akgw.centralindia-01.azurewebsites.net/
 
-
