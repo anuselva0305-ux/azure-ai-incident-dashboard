@@ -2,20 +2,49 @@
 <html>
 <head>
     <title>Azure AI Dashboard</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            margin: 100px auto;
+            width: 400px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            width: 90%;
+        }
+        button {
+            background: #0078D4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+    </style>
 </head>
+
 <body>
+<div class="container">
+    <h1>📊 Azure AI Dashboard</h1>
 
-<h1>📂 Upload Files</h1>
-
-<form action="/analyze" method="post" enctype="multipart/form-data">
-    <label>Inventory File:</label>
-    <input type="file" name="inventory" required><br><br>
-
-    <label>Incident File:</label>
-    <input type="file" name="incident" required><br><br>
-
-    <button type="submit">Analyze</button>
-</form>
-
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+        <input type="file" name="inventory" required><br>
+        <input type="file" name="incident" required><br>
+        <button type="submit">Analyze 🚀</button>
+    </form>
+</div>
 </body>
 </html>
