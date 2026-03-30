@@ -4,11 +4,18 @@
     <title>Azure AI Dashboard</title>
 </head>
 <body>
-    <h1>🚀 Azure AI Dashboard</h1>
 
-    <h2>Total Incidents: {{ total }}</h2>
-    <h2>Top Category: {{ top }}</h2>
-    <h3>AI Insight: {{ insight }}</h3>
+<h1>📂 Upload Files</h1>
+
+<form action="/analyze" method="post" enctype="multipart/form-data">
+    <label>Inventory File:</label>
+    <input type="file" name="inventory" required><br><br>
+
+    <label>Incident File:</label>
+    <input type="file" name="incident" required><br><br>
+
+    <button type="submit">Analyze</button>
+</form>
 
 </body>
 </html>

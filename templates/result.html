@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Result</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<h1>📊 Analysis Dashboard</h1>
+
+<button onclick="showTab('summary')">Summary</button>
+<button onclick="showTab('charts')">Charts</button>
+
+<div id="summary">
+    <h2>Inventory Count: {{ inventory_count }}</h2>
+    <h2>Incident Count: {{ incident_count }}</h2>
+    <h3>Top OS Subcategory: {{ top_os_sub }}</h3>
+    <h3>Top OS Name: {{ top_os_name }}</h3>
+</div>
+
+<div id="charts" style="display:none;">
+    <canvas id="priorityChart"></canvas>
+</div>
+
+<script>
+function showTab(tab) {
+    document.getElementById("summary").style.display = "none";
+    document.getElementById("charts").style.display = "none";
+    document.getElementById(tab).style.display = "block";
+}
+
+// Chart
+const data = {{ priority_counts | tojson }};
+const labels = Object.keys(data);
+const values = Object.values(data);
+
+new Chart(document.getElementById("priorityChart"), {
+    type: "bar",
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Priority Count",
+            data: values
+        }]
+    }
+});
+</script>
+
+</body>
+</html>
