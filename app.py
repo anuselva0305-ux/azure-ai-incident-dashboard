@@ -16,21 +16,25 @@ def analyze():
         inventory_file = request.files['inventory']
         incident_file = request.files['incident']
 
-        inv = pd.read_excel(inventory_file)
-        inc = pd.read_excel(incident_file)
+        # ✅ FAST + SAFE READ (IMPORTANT)
+        inv = pd.read_excel(inventory_file, engine='openpyxl', nrows=10000)
+        inc = pd.read_excel(incident_file, engine='openpyxl', nrows=10000)
 
-        # NORMALIZE COLUMN NAMES
+        print("FILES READ SUCCESSFULLY")
+
+        # Normalize column names
         inv.columns = inv.columns.str.strip().str.lower()
         inc.columns = inc.columns.str.strip().str.lower()
 
-        print("INVENTORY COLUMNS:", inv.columns)
-        print("INCIDENT COLUMNS:", inc.columns)
-
+        # =========================
         # COUNTS
+        # =========================
         inventory_count = len(inv)
         incident_count = len(inc)
 
+        # =========================
         # INVENTORY DATA
+        # =========================
         top_os_sub = "N/A"
         top_os_name = "N/A"
 
@@ -41,7 +45,7 @@ def analyze():
                 top_os_name = inv[col].value_counts().idxmax()
 
         # =========================
-        # INCIDENT AUTO DETECT
+        # FIND COLUMN FUNCTION
         # =========================
         def find_column(columns, keywords):
             for key in keywords:
@@ -53,23 +57,19 @@ def analyze():
         priority_col = find_column(inc.columns, ['priority'])
         host_col = find_column(inc.columns, ['host'])
         resolution_col = find_column(inc.columns, ['resolution'])
-        os_col = find_column(inc.columns, ['os'])
-
-        print("Detected Columns:")
-        print(priority_col, host_col, resolution_col, os_col)
+        os_col = find_column(inc.columns, ['os type', 'operating system'])
 
         # =========================
-        # CALCULATIONS
+        # SAFE CALCULATIONS
         # =========================
-
         priority_counts = (
             inc[priority_col].value_counts().to_dict()
-            if priority_col else {}
+            if priority_col and priority_col in inc.columns else {}
         )
 
         top_hosts = (
             inc[host_col].value_counts().head(10).to_dict()
-            if host_col else {}
+            if host_col and host_col in inc.columns else {}
         )
 
         resolution_percent = (
@@ -77,7 +77,7 @@ def analyze():
             .round(2)
             .head(10)
             .to_dict()
-            if resolution_col else {}
+            if resolution_col and resolution_col in inc.columns else {}
         )
 
         os_percent = (
@@ -85,7 +85,7 @@ def analyze():
             .round(2)
             .head(10)
             .to_dict()
-            if os_col else {}
+            if os_col and os_col in inc.columns else {}
         )
 
         return render_template(
@@ -101,6 +101,7 @@ def analyze():
         )
 
     except Exception as e:
+        print("ERROR:", str(e))
         return f"Error: {str(e)}"
 
 

@@ -2,15 +2,10 @@
 <html>
 <head>
     <title>Executive Dashboard</title>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body {
-            font-family:'Segoe UI';
-            background:#f4f6f9;
-            margin:0;
-        }
+        body { font-family:'Segoe UI'; background:#f4f6f9; margin:0; }
 
         .header {
             background:#1f2937;
@@ -18,7 +13,6 @@
             padding:15px 30px;
             display:flex;
             justify-content:space-between;
-            align-items:center;
         }
 
         .container { padding:20px; }
@@ -47,14 +41,12 @@
             background:white;
             padding:20px;
             border-radius:10px;
-            height:320px;
-            display:flex;
-            flex-direction:column;
+            height:300px;
         }
 
-        .chart-card canvas {
-            flex:1;
-            max-height:250px;
+        canvas {
+            width:100% !important;
+            height:220px !important;
         }
     </style>
 </head>
@@ -77,70 +69,33 @@
 
 <div class="charts">
 
-<div class="chart-card">
-<h3>Priority</h3>
-<canvas id="priorityChart"></canvas>
-</div>
-
-<div class="chart-card">
-<h3>Top Hosts</h3>
-<canvas id="hostChart"></canvas>
-</div>
-
-<div class="chart-card">
-<h3>Resolution %</h3>
-<canvas id="resolutionChart"></canvas>
-</div>
-
-<div class="chart-card">
-<h3>OS Type %</h3>
-<canvas id="osChart"></canvas>
-</div>
+<div class="chart-card"><h3>Priority</h3><canvas id="priorityChart"></canvas></div>
+<div class="chart-card"><h3>Top Hosts</h3><canvas id="hostChart"></canvas></div>
+<div class="chart-card"><h3>Resolution %</h3><canvas id="resolutionChart"></canvas></div>
+<div class="chart-card"><h3>OS Type %</h3><canvas id="osChart"></canvas></div>
 
 </div>
 
 </div>
 
 <script>
-const priorityData = {{ priority_counts | tojson }};
-const hostData = {{ top_hosts | tojson }};
-const resolutionData = {{ resolution_percent | tojson }};
-const osData = {{ os_percent | tojson }};
+function draw(id,type,data){
+    if(!data || Object.keys(data).length===0) return;
 
-const colors = [
-    '#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1',
-    '#14b8a6','#e11d48','#a855f7','#22c55e','#f97316'
-];
-
-function drawChart(id, type, data) {
-    if (!data || Object.keys(data).length === 0) {
-        console.log(id + " empty");
-        return;
-    }
-
-    new Chart(document.getElementById(id), {
-        type: type,
-        data: {
-            labels: Object.keys(data),
-            datasets: [{
-                data: Object.values(data),
-                backgroundColor: colors
-            }]
+    new Chart(document.getElementById(id),{
+        type:type,
+        data:{
+            labels:Object.keys(data),
+            datasets:[{ data:Object.values(data) }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' }
-            }
-        }
+        options:{ responsive:true, maintainAspectRatio:false }
     });
 }
 
-drawChart("priorityChart","bar",priorityData);
-drawChart("hostChart","bar",hostData);
-drawChart("resolutionChart","pie",resolutionData);
-drawChart("osChart","doughnut",osData);
+draw("priorityChart","bar",{{ priority_counts | tojson }});
+draw("hostChart","bar",{{ top_hosts | tojson }});
+draw("resolutionChart","pie",{{ resolution_percent | tojson }});
+draw("osChart","doughnut",{{ os_percent | tojson }});
 </script>
 
 </body>
